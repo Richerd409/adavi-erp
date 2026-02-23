@@ -193,15 +193,6 @@ Tailor:
 
 ---
 
-# Future Expansion (Not Required Now)
-
-- WhatsApp automation
-- Multi-branch support
-- Analytics dashboard
-- SaaS version
-
----
-
 # Goal
 
 Build a clean, secure, scalable boutique ERP system
