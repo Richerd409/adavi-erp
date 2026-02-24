@@ -14,6 +14,7 @@ export interface Database {
           id: string
           name: string
           role: 'admin' | 'manager' | 'tailor'
+          location: string | null
           created_at: string
           email: string | null
         }
@@ -21,6 +22,7 @@ export interface Database {
           id: string
           name: string
           role: 'admin' | 'manager' | 'tailor'
+          location?: string | null
           created_at?: string
           email?: string | null
         }
@@ -28,6 +30,7 @@ export interface Database {
           id?: string
           name?: string
           role?: 'admin' | 'manager' | 'tailor'
+          location?: string | null
           created_at?: string
           email?: string | null
         }
@@ -51,6 +54,7 @@ export interface Database {
           assigned_tailor_id: string | null
           measurement_id: string | null
           notes: string | null
+          location: string | null
           created_at: string
         }
         Insert: {
@@ -63,6 +67,7 @@ export interface Database {
           assigned_tailor_id?: string | null
           measurement_id?: string | null
           notes?: string | null
+          location?: string | null
           created_at?: string
         }
         Update: {
@@ -75,6 +80,7 @@ export interface Database {
           assigned_tailor_id?: string | null
           measurement_id?: string | null
           notes?: string | null
+          location?: string | null
           created_at?: string
         }
         Relationships: [
@@ -104,6 +110,7 @@ export interface Database {
           sleeve_length: string | null
           top_length: string | null
           notes: string | null
+          unit: 'in' | 'cm'
           created_at: string
         }
         Insert: {
@@ -117,6 +124,7 @@ export interface Database {
           sleeve_length?: string | null
           top_length?: string | null
           notes?: string | null
+          unit?: 'in' | 'cm'
           created_at?: string
         }
         Update: {
@@ -130,6 +138,7 @@ export interface Database {
           sleeve_length?: string | null
           top_length?: string | null
           notes?: string | null
+          unit?: 'in' | 'cm'
           created_at?: string
         }
         Relationships: []

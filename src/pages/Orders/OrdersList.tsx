@@ -7,16 +7,17 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
-import { Loader2, Plus, Search, Filter } from 'lucide-react';
+import { Loader2, Plus, Search, Filter, MapPin } from 'lucide-react';
 
 type Order = Database['public']['Tables']['orders']['Row'];
 
 const OrdersList: React.FC = () => {
-  const { user, role } = useAuth();
+  const { user, role, location } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [locationFilter, setLocationFilter] = useState<string>('All');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +28,9 @@ const OrdersList: React.FC = () => {
 
         if (role === 'tailor' && user) {
           query = query.eq('assigned_tailor_id', user.id);
+        } else if (role === 'manager' && location) {
+           // Managers only see orders in their location
+           query = query.eq('location', location);
         }
 
         const { data, error } = await query;
@@ -46,7 +50,7 @@ const OrdersList: React.FC = () => {
     if (user) {
       fetchOrders();
     }
-  }, [user, role]);
+  }, [user, role, location]);
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch =
@@ -55,8 +59,14 @@ const OrdersList: React.FC = () => {
 
     const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    // Admin can filter by location client-side if they fetched all.
+    // Managers already have filtered data from API, so 'All' is fine for them (it means all in their location).
+    const matchesLocation = locationFilter === 'All' || order.location === locationFilter;
+
+    return matchesSearch && matchesStatus && (role === 'admin' ? matchesLocation : true);
   });
+
+  const uniqueLocations = Array.from(new Set(orders.map(o => o.location).filter(Boolean)));
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -91,7 +101,7 @@ const OrdersList: React.FC = () => {
         )}
       </div>
 
-      <Card className="flex flex-col sm:flex-row gap-4">
+      <Card className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted w-4 h-4" />
           <Input
@@ -101,21 +111,39 @@ const OrdersList: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="relative w-full sm:w-64">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted w-4 h-4" />
-            <select
-              className="w-full pl-10 pr-4 py-2 border border-muted rounded-lg focus:outline-none focus:ring-1 focus:ring-primary bg-surface appearance-none"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="All">All Statuses</option>
-              <option value="New">New</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Trial">Trial</option>
-              <option value="Alteration">Alteration</option>
-              <option value="Completed">Completed</option>
-              <option value="Delivered">Delivered</option>
-            </select>
+        <div className="flex gap-4">
+            <div className="relative w-40">
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted w-4 h-4" />
+                <select
+                className="w-full pl-10 pr-4 py-2 border border-muted rounded-lg focus:outline-none focus:ring-1 focus:ring-primary bg-surface appearance-none"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                <option value="All">All Statuses</option>
+                <option value="New">New</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Trial">Trial</option>
+                <option value="Alteration">Alteration</option>
+                <option value="Completed">Completed</option>
+                <option value="Delivered">Delivered</option>
+                </select>
+            </div>
+
+            {role === 'admin' && (
+                <div className="relative w-40">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted w-4 h-4" />
+                    <select
+                    className="w-full pl-10 pr-4 py-2 border border-muted rounded-lg focus:outline-none focus:ring-1 focus:ring-primary bg-surface appearance-none"
+                    value={locationFilter}
+                    onChange={(e) => setLocationFilter(e.target.value)}
+                    >
+                    <option value="All">All Locations</option>
+                    {uniqueLocations.map(loc => (
+                        <option key={loc} value={loc as string}>{loc}</option>
+                    ))}
+                    </select>
+                </div>
+            )}
         </div>
       </Card>
 
@@ -142,7 +170,15 @@ const OrdersList: React.FC = () => {
                 </div>
                 <div className="text-sm text-text-muted space-y-1">
                   <p>{order.garment_type}</p>
-                  <p>Due: {new Date(order.delivery_date).toLocaleDateString()}</p>
+                  <div className="flex items-center gap-3">
+                    <span>Due: {new Date(order.delivery_date).toLocaleDateString()}</span>
+                    {order.location && (
+                        <span className="flex items-center text-xs bg-muted/50 px-2 py-0.5 rounded">
+                            <MapPin className="w-3 h-3 mr-1" />
+                            {order.location}
+                        </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="text-right">

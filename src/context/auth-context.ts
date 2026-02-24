@@ -7,6 +7,7 @@ type UserRole = Database['public']['Tables']['users']['Row']['role'];
 export interface AuthContextType {
   user: User | null;
   role: UserRole | null;
+  location: string | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }

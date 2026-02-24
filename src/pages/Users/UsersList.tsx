@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../components/ui/Card';
-import { Loader2, Shield } from 'lucide-react';
+import { Loader2, Shield, MapPin } from 'lucide-react';
 
 type User = Database['public']['Tables']['users']['Row'];
 type UserRole = User['role'];
@@ -61,6 +61,22 @@ const UsersList: React.FC = () => {
     }
   };
 
+  const updateUserLocation = async (userId: string, newLocation: string) => {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ location: newLocation })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      setUsers(users.map(u => u.id === userId ? { ...u, location: newLocation } : u));
+    } catch (err) {
+      console.error('Error updating location:', err);
+      alert('Failed to update user location.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -73,7 +89,7 @@ const UsersList: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-serif font-bold text-primary">Users</h1>
-        <p className="text-text-muted mt-1">Manage system access and roles.</p>
+        <p className="text-text-muted mt-1">Manage system access, roles, and locations.</p>
       </div>
 
       <Card>
@@ -84,6 +100,7 @@ const UsersList: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Location</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Joined</th>
               </tr>
             </thead>
@@ -116,6 +133,21 @@ const UsersList: React.FC = () => {
                         <option value="tailor">Tailor</option>
                       </select>
                       {u.role === 'admin' && <Shield className="w-4 h-4 text-primary" />}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2 max-w-[150px]">
+                      <MapPin className="w-4 h-4 text-text-muted" />
+                      <input
+                        className="w-full bg-transparent border-b border-muted focus:border-primary focus:outline-none text-sm py-1"
+                        defaultValue={u.location || ''}
+                        placeholder="Assign Location"
+                        onBlur={(e) => {
+                            if (e.target.value !== u.location) {
+                                updateUserLocation(u.id, e.target.value);
+                            }
+                        }}
+                      />
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted">

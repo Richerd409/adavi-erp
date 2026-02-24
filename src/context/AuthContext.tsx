@@ -9,13 +9,14 @@ type UserRole = Database['public']['Tables']['users']['Row']['role'];
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
+  const [location, setLocation] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserRole(session.user.id);
+        fetchUserDetails(session.user.id);
       } else {
         setLoading(false);
       }
@@ -24,9 +25,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserRole(session.user.id);
+        fetchUserDetails(session.user.id);
       } else {
         setRole(null);
+        setLocation(null);
         setLoading(false);
       }
     });
@@ -34,22 +36,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserDetails = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('users')
-        .select('role')
+        .select('role, location')
         .eq('id', userId)
         .single();
 
       if (error) {
-        console.error('Error fetching user role:', error);
+        console.error('Error fetching user details:', error);
         setRole(null);
+        setLocation(null);
       } else {
         setRole(data.role);
+        setLocation(data.location);
       }
     } catch (err) {
-      console.error('Unexpected error fetching role:', err);
+      console.error('Unexpected error fetching details:', err);
     } finally {
       setLoading(false);
     }
@@ -59,9 +63,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await supabase.auth.signOut();
     setUser(null);
     setRole(null);
+    setLocation(null);
   };
 
-  const value: AuthContextType = { user, role, loading, signOut };
+  const value: AuthContextType = { user, role, location, loading, signOut };
 
   return (
     <AuthContext.Provider value={value}>

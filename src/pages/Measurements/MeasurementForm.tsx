@@ -27,6 +27,7 @@ const MeasurementForm: React.FC = () => {
     sleeve_length: '',
     top_length: '',
     notes: '',
+    unit: 'in', // Default to inches
   });
 
   const isEditMode = !!id;
@@ -55,6 +56,7 @@ const MeasurementForm: React.FC = () => {
               sleeve_length: data.sleeve_length || '',
               top_length: data.top_length || '',
               notes: data.notes || '',
+              unit: data.unit || 'in',
             });
           }
         }
@@ -75,7 +77,7 @@ const MeasurementForm: React.FC = () => {
     }
   }, [id, role, navigate]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -161,6 +163,21 @@ const MeasurementForm: React.FC = () => {
 
       <Card>
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex justify-end">
+            <div className="flex items-center space-x-2 bg-muted/30 p-1 rounded-lg">
+              <span className="text-sm font-medium px-2">Unit:</span>
+              <select
+                name="unit"
+                value={formData.unit}
+                onChange={handleChange}
+                className="bg-transparent border-none text-sm font-medium text-primary focus:ring-0 cursor-pointer"
+              >
+                <option value="in">Inches (in)</option>
+                <option value="cm">Centimeters (cm)</option>
+              </select>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="Client Name"
@@ -181,7 +198,7 @@ const MeasurementForm: React.FC = () => {
           </div>
 
           <div className="border-t border-muted my-6"></div>
-          <h3 className="text-lg font-medium text-primary mb-4">Body Measurements</h3>
+          <h3 className="text-lg font-medium text-primary mb-4">Body Measurements ({formData.unit})</h3>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             <Input
@@ -189,42 +206,42 @@ const MeasurementForm: React.FC = () => {
               name="chest"
               value={formData.chest || ''}
               onChange={handleChange}
-              placeholder='e.g. 40"'
+              placeholder={formData.unit === 'in' ? 'e.g. 40"' : 'e.g. 102cm'}
             />
             <Input
               label="Waist"
               name="waist"
               value={formData.waist || ''}
               onChange={handleChange}
-              placeholder='e.g. 32"'
+              placeholder={formData.unit === 'in' ? 'e.g. 32"' : 'e.g. 81cm'}
             />
             <Input
               label="Hip"
               name="hip"
               value={formData.hip || ''}
               onChange={handleChange}
-              placeholder='e.g. 36"'
+              placeholder={formData.unit === 'in' ? 'e.g. 36"' : 'e.g. 91cm'}
             />
             <Input
               label="Shoulder"
               name="shoulder"
               value={formData.shoulder || ''}
               onChange={handleChange}
-              placeholder='e.g. 18"'
+              placeholder={formData.unit === 'in' ? 'e.g. 18"' : 'e.g. 46cm'}
             />
             <Input
               label="Sleeve Length"
               name="sleeve_length"
               value={formData.sleeve_length || ''}
               onChange={handleChange}
-              placeholder='e.g. 24"'
+              placeholder={formData.unit === 'in' ? 'e.g. 24"' : 'e.g. 61cm'}
             />
             <Input
               label="Top Length"
               name="top_length"
               value={formData.top_length || ''}
               onChange={handleChange}
-              placeholder='e.g. 28"'
+              placeholder={formData.unit === 'in' ? 'e.g. 28"' : 'e.g. 71cm'}
             />
           </div>
 
