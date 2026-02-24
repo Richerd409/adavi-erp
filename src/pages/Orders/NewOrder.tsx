@@ -12,7 +12,7 @@ type OrderInsert = Database['public']['Tables']['orders']['Insert'];
 
 const NewOrder: React.FC = () => {
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { role, location } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<OrderInsert>({
     client_name: '',
@@ -21,6 +21,7 @@ const NewOrder: React.FC = () => {
     delivery_date: '',
     notes: '',
     status: 'New',
+    location: '', // Will be set on mount or change
   });
 
   useEffect(() => {
@@ -29,7 +30,13 @@ const NewOrder: React.FC = () => {
     }
   }, [role, navigate]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  useEffect(() => {
+    if (location) {
+      setFormData(prev => ({ ...prev, location }));
+    }
+  }, [location]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -104,6 +111,27 @@ const NewOrder: React.FC = () => {
             onChange={handleChange}
             required
           />
+
+          {/* Location Selection - Only editable by Admin if needed, or just show it */}
+          <div className="w-full">
+            <label className="block text-sm font-medium text-text-muted mb-1">
+              Location
+            </label>
+            {role === 'admin' ? (
+               <Input
+                 name="location"
+                 value={formData.location || ''}
+                 onChange={handleChange}
+                 placeholder="Enter location (e.g., Downtown)"
+               />
+            ) : (
+              <Input
+                value={formData.location || 'Unassigned'}
+                disabled
+                className="bg-muted/10 text-text-muted"
+              />
+            )}
+          </div>
 
           <div className="space-y-1">
             <label className="block text-sm font-medium text-text-muted">Notes</label>

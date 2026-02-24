@@ -4,15 +4,16 @@ import { supabase } from '../lib/supabase';
 import type { Database } from '../types/supabase';
 import Card from '../components/ui/Card';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 type Order = Database['public']['Tables']['orders']['Row'];
 
 const Dashboard: React.FC = () => {
-  const { user, role } = useAuth();
+  const { user, role, location } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [locationFilter, setLocationFilter] = useState<string>('All');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,6 +24,8 @@ const Dashboard: React.FC = () => {
 
         if (role === 'tailor' && user) {
           query = query.eq('assigned_tailor_id', user.id);
+        } else if (role === 'manager' && location) {
+           query = query.eq('location', location);
         }
 
         const { data, error } = await query;
@@ -42,7 +45,7 @@ const Dashboard: React.FC = () => {
     if (user) {
       fetchOrders();
     }
-  }, [user, role]);
+  }, [user, role, location]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -56,11 +59,20 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const filteredOrders = orders.filter(order => {
+      if (role === 'admin' && locationFilter !== 'All') {
+          return order.location === locationFilter;
+      }
+      return true;
+  });
+
+  const uniqueLocations = Array.from(new Set(orders.map(o => o.location).filter(Boolean)));
+
   const groupOrdersByStatus = () => {
     const statuses = ['New', 'In Progress', 'Trial', 'Alteration', 'Completed', 'Delivered'];
     const groups: { [key: string]: Order[] } = {};
     statuses.forEach(status => groups[status] = []);
-    orders.forEach(order => {
+    filteredOrders.forEach(order => {
       const status = order.status || 'New';
       if (!groups[status]) {
           groups[status] = [];
@@ -71,10 +83,10 @@ const Dashboard: React.FC = () => {
   };
 
   const kpiStats = () => {
-    const total = orders.length;
-    const active = orders.filter(o => !['Completed', 'Delivered'].includes(o.status || '')).length;
-    const completed = orders.filter(o => o.status === 'Completed').length;
-    const delivered = orders.filter(o => o.status === 'Delivered').length;
+    const total = filteredOrders.length;
+    const active = filteredOrders.filter(o => !['Completed', 'Delivered'].includes(o.status || '')).length;
+    const completed = filteredOrders.filter(o => o.status === 'Completed').length;
+    const delivered = filteredOrders.filter(o => o.status === 'Delivered').length;
     return { total, active, completed, delivered };
   };
 
@@ -91,11 +103,31 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-serif font-bold text-primary">Dashboard</h1>
-        <p className="text-text-muted mt-2">Welcome back, {role}. Here is an overview of your workshop.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 className="text-3xl font-serif font-bold text-primary">Dashboard</h1>
+            <p className="text-text-muted mt-2">
+                Welcome back, {role}. {location ? `Location: ${location}` : 'Overview of all workshops.'}
+            </p>
+        </div>
+        {role === 'admin' && uniqueLocations.length > 0 && (
+            <div className="relative w-48">
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted w-4 h-4" />
+                <select
+                className="w-full pl-10 pr-4 py-2 border border-muted rounded-lg focus:outline-none focus:ring-1 focus:ring-primary bg-surface appearance-none"
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+                >
+                <option value="All">All Locations</option>
+                {uniqueLocations.map(loc => (
+                    <option key={loc} value={loc as string}>{loc}</option>
+                ))}
+                </select>
+            </div>
+        )}
       </div>
 
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="flex flex-col items-center justify-center py-8">
           <h3 className="text-4xl font-bold text-primary">{stats.total}</h3>
@@ -115,6 +147,7 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
+      {/* Kanban Board */}
       <div className="overflow-x-auto pb-4">
         <div className="flex gap-6 min-w-[1200px] p-1">
           {Object.entries(orderGroups).map(([status, items]) => (
@@ -141,6 +174,11 @@ const Dashboard: React.FC = () => {
                     <p className="text-sm text-text-muted mb-2">{order.garment_type}</p>
                     <div className="flex justify-between items-center text-xs text-text-muted border-t border-muted pt-2 mt-2">
                       <span>Due: {new Date(order.delivery_date).toLocaleDateString()}</span>
+                      {order.location && (
+                        <span className="flex items-center text-[10px] bg-muted/30 px-1.5 py-0.5 rounded">
+                            {order.location}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}

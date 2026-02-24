@@ -109,7 +109,10 @@ const MeasurementsList: React.FC = () => {
                   <h3 className="font-medium text-lg text-primary group-hover:text-blue-600 transition-colors">
                     {m.client_name}
                   </h3>
-                  <p className="text-sm text-text-muted">{m.phone}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-text-muted">{m.phone}</p>
+                    <span className="text-xs bg-muted/50 px-1.5 py-0.5 rounded text-text-muted font-medium uppercase">{m.unit}</span>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-y-2 text-sm text-text-muted">
