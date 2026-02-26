@@ -1,29 +1,117 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-background text-text antialiased font-sans;
+  * {
+    border-color: #ffffff14;
   }
+
+  body {
+    @apply bg-background text-text antialiased font-sans font-light;
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: rgba(99, 102, 241, 0.3); /* Primary with opacity */
+    color: white;
+  }
+
+  /* Custom Scrollbar for sleek aesthetics */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif text-primary;
+    @apply font-display font-semibold tracking-tight;
   }
 }
 
 @layer components {
+  /* Premium Glassmorphic Card */
+  .glass-card {
+    @apply bg-surface/70 backdrop-blur-md border border-white/10 rounded-2xl shadow-glass transition-all duration-300;
+  }
+  
+  .glass-card:hover {
+    @apply shadow-glass-hover border-white/20 bg-surface-hover/85;
+  }
+
+  /* Beautiful interactive buttons */
   .btn-primary {
-    @apply bg-primary text-white hover:bg-black transition-colors rounded-lg px-4 py-2 font-medium shadow-soft;
+    @apply relative overflow-hidden bg-primary text-white hover:bg-primary-hover active:scale-95 transition-all duration-200 rounded-xl px-5 py-2.5 font-medium shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:shadow-[0_0_25px_rgba(99,102,241,0.5)];
   }
+
   .btn-secondary {
-    @apply bg-white text-primary border border-muted hover:bg-gray-50 transition-colors rounded-lg px-4 py-2 font-medium shadow-soft;
+    @apply bg-surface text-text hover:bg-surface-hover border border-white/10 active:scale-95 transition-all duration-200 rounded-xl px-5 py-2.5 font-medium shadow-glass;
   }
-  .card {
-    @apply bg-surface rounded-xl shadow-soft p-6 border border-muted/50;
+  
+  .btn-ghost {
+    @apply text-text-muted hover:text-text hover:bg-white/5 active:scale-95 transition-all duration-200 rounded-xl px-4 py-2 font-medium;
   }
-  .input {
-    @apply w-full px-3 py-2 border border-muted rounded-lg focus:outline-none focus:ring-1 focus:ring-primary transition-shadow bg-surface;
+
+  /* High-end inputs */
+  .input-premium {
+    @apply w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-text placeholder-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm;
+  }
+
+  /* Status Badges */
+  .badge {
+    @apply px-2.5 py-1 rounded-full text-xs font-medium border backdrop-blur-sm;
+  }
+  .badge-success {
+    @apply bg-success/10 text-success border-success/20;
+  }
+  .badge-warning {
+    @apply bg-warning/10 text-warning border-warning/20;
+  }
+  .badge-error {
+    @apply bg-error/10 text-error border-error/20;
+  }
+  .badge-neutral {
+    @apply bg-white/5 text-text-muted border-white/10;
+  }
+
+  /* Table premium styles */
+  .table-container {
+    @apply w-full overflow-x-auto rounded-2xl border border-white/10 bg-surface backdrop-blur-md shadow-glass;
+  }
+  
+  .table-premium {
+    @apply w-full text-left border-collapse;
+  }
+  
+  .table-premium th {
+    @apply px-6 py-4 border-b border-white/10 text-xs font-semibold text-text-muted uppercase tracking-wider bg-white/5;
+  }
+  
+  .table-premium td {
+    @apply px-6 py-4 border-b border-white/5 text-sm text-text transition-colors;
+  }
+  
+  .table-premium tbody tr {
+    @apply hover:bg-white/[0.03] transition-colors duration-200 cursor-pointer;
+  }
+  
+  .table-premium tbody tr:last-child td {
+    @apply border-b-0;
   }
 }

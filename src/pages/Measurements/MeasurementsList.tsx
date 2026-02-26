@@ -5,7 +5,7 @@ import type { Database } from '../../types/supabase';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import Card from '../../components/ui/Card';
+import { Card } from '../../components/ui/Card';
 import { Loader2, Plus, Search, Ruler } from 'lucide-react';
 
 type Measurement = Database['public']['Tables']['measurements']['Row'];
@@ -106,9 +106,16 @@ const MeasurementsList: React.FC = () => {
                   <Ruler className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-lg text-primary group-hover:text-blue-600 transition-colors">
-                    {m.client_name}
-                  </h3>
+                  <div className="flex items-center justify-between gap-4">
+                    <h3 className="font-medium text-lg text-primary group-hover:text-blue-600 transition-colors">
+                      {m.client_name}
+                    </h3>
+                    {m.measurement_number && (
+                      <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                        {m.measurement_number}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-text-muted">{m.phone}</p>
                 </div>
               </div>

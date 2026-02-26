@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import Card from '../../components/ui/Card';
+import { Card } from '../../components/ui/Card';
 import { ArrowLeft, Save, Trash2, Loader2 } from 'lucide-react';
 
 type MeasurementInsert = Database['public']['Tables']['measurements']['Insert'];
@@ -27,6 +27,7 @@ const MeasurementForm: React.FC = () => {
     sleeve_length: '',
     top_length: '',
     notes: '',
+    measurement_number: '',
   });
 
   const isEditMode = !!id;
@@ -55,6 +56,7 @@ const MeasurementForm: React.FC = () => {
               sleeve_length: data.sleeve_length || '',
               top_length: data.top_length || '',
               notes: data.notes || '',
+              measurement_number: data.measurement_number || '',
             });
           }
         }
@@ -68,6 +70,10 @@ const MeasurementForm: React.FC = () => {
     if (role === 'tailor') {
       navigate('/app/dashboard');
       return;
+    }
+
+    if (!id && !formData.measurement_number) {
+      setFormData(prev => ({ ...prev, measurement_number: `M-${Date.now().toString().slice(-6)}` }));
     }
 
     if (id) {
@@ -177,6 +183,15 @@ const MeasurementForm: React.FC = () => {
               onChange={handleChange}
               required
               placeholder="Phone Number"
+            />
+            <Input
+              label="Measurement Number"
+              name="measurement_number"
+              value={formData.measurement_number || ''}
+              onChange={handleChange}
+              readOnly
+              className="bg-muted/10 opacity-70"
+              placeholder="Auto-generated"
             />
           </div>
 

@@ -11,10 +11,13 @@ import NewOrder from './pages/Orders/NewOrder';
 import MeasurementsList from './pages/Measurements/MeasurementsList';
 import MeasurementForm from './pages/Measurements/MeasurementForm';
 import UsersList from './pages/Users/UsersList';
+import FinanceList from './pages/Finance/FinanceList';
+import ClientsList from './pages/Clients/ClientsList';
+import ClientForm from './pages/Clients/ClientForm';
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -33,9 +36,16 @@ const App: React.FC = () => {
               <Route path="measurements/new" element={<MeasurementForm />} />
               <Route path="measurements/:id" element={<MeasurementForm />} />
 
+              <Route path="clients" element={<ClientsList />} />
+              <Route path="clients/new" element={<ClientForm />} />
+              <Route path="clients/:id" element={<ClientForm />} />
+
               {/* Admin Only Route */}
               <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
                 <Route path="users" element={<UsersList />} />
+              </Route>
+              <Route element={<ProtectedRoute allowedRoles={['admin', 'manager']} />}>
+                <Route path="finance" element={<FinanceList />} />
               </Route>
             </Route>
           </Route>

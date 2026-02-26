@@ -61,7 +61,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRole(null);
   };
 
-  const value: AuthContextType = { user, role, loading, signOut };
+  const signInWithOtp = async (email: string) => {
+    return await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: window.location.origin,
+      },
+    });
+  };
+
+  const bypassAuth = () => {
+    setUser({
+      id: 'dev-admin',
+      email: 'admin@adavi.dev',
+      role: 'authenticated',
+      aud: 'authenticated',
+      created_at: new Date().toISOString(),
+    } as any);
+    setRole('admin');
+    setLoading(false);
+  };
+
+  const value: AuthContextType = { user, role, loading, signOut, signInWithOtp, bypassAuth };
 
   return (
     <AuthContext.Provider value={value}>

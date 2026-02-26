@@ -4,8 +4,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
-import Badge from '../../components/ui/Badge';
+import { Card } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
 import { Loader2, ArrowLeft, User, Calendar, FileText, Ruler } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -14,12 +14,13 @@ type User = Database['public']['Tables']['users']['Row'];
 
 const OrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [tailors, setTailors] = useState<User[]>([]);
   const [assigning, setAssigning] = useState(false);
+  const [measurement, setMeasurement] = useState<Database['public']['Tables']['measurements']['Row'] | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -27,7 +28,7 @@ const OrderDetail: React.FC = () => {
         setLoading(true);
         const { data, error } = await supabase
           .from('orders')
-          .select('*')
+          .select('*, measurements(*)')
           .eq('id', id!)
           .single();
 
@@ -35,6 +36,9 @@ const OrderDetail: React.FC = () => {
           console.error('Error fetching order:', error);
         } else {
           setOrder(data);
+          if (data.measurements) {
+            setMeasurement(data.measurements);
+          }
         }
       } catch (err) {
         console.error('Unexpected error:', err);
@@ -96,11 +100,17 @@ const OrderDetail: React.FC = () => {
     }
   };
 
-  const getNextStatus = (current: Order['status']): Order['status'] | null => {
+  const getNextStatuses = (current: Order['status']): Order['status'][] => {
     const flow: Order['status'][] = ['New', 'In Progress', 'Trial', 'Alteration', 'Completed', 'Delivered'];
     const index = flow.indexOf(current);
-    if (index === -1 || index === flow.length - 1) return null;
-    return flow[index + 1];
+    if (index === -1 || index === flow.length - 1) return [];
+
+    // Special case: Trial can go to Alteration OR Completed
+    if (current === 'Trial') {
+      return ['Alteration', 'Completed'];
+    }
+
+    return [flow[index + 1]];
   };
 
   if (loading) {
@@ -115,7 +125,10 @@ const OrderDetail: React.FC = () => {
     return <div className="text-center py-12">Order not found</div>;
   }
 
-  const nextStatus = getNextStatus(order.status);
+  const nextStatuses = getNextStatuses(order.status);
+  const isOwner = user?.id === order.assigned_tailor_id;
+  const isAdminOrManager = role === 'admin' || role === 'manager';
+  const canUpdateStatus = isAdminOrManager || isOwner;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -127,17 +140,17 @@ const OrderDetail: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-serif font-bold text-primary">Order #{order.id.slice(0, 8)}</h1>
-          <p className="text-text-muted mt-1">Created on {format(new Date(order.created_at), 'PPP')}</p>
+          <p className="text-text-muted mt-1">Created on {order.created_at ? format(new Date(order.created_at), 'PPP') : 'N/A'}</p>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="text-lg px-3 py-1">
             {order.status}
           </Badge>
-          {nextStatus && (
-            <Button onClick={() => updateStatus(nextStatus)}>
-              Move to {nextStatus}
+          {canUpdateStatus && nextStatuses.map((next) => (
+            <Button key={next} onClick={() => updateStatus(next)}>
+              Move to {next}
             </Button>
-          )}
+          ))}
         </div>
       </div>
 
@@ -189,34 +202,55 @@ const OrderDetail: React.FC = () => {
             <div className="space-y-2">
               <div>
                 <label className="text-xs text-text-muted uppercase font-bold">Delivery Date</label>
-                <p className="text-lg font-medium text-primary">
-                  {format(new Date(order.delivery_date), 'PPP')}
+                <p className="font-semibold text-primary">
+                  {order.delivery_date ? format(new Date(order.delivery_date), 'MMM dd, yyyy') : 'N/A'}
                 </p>
               </div>
             </div>
           </Card>
 
           <Card>
-            <h3 className="text-lg font-medium mb-4 flex items-center">
-              <Ruler className="w-5 h-5 mr-2" />
-              Measurements
-            </h3>
-            {order.measurement_id ? (
-              <Button
-                variant="secondary"
-                className="w-full"
-                onClick={() => navigate(`/app/measurements/${order.measurement_id}`)}
-              >
-                View Measurements
-              </Button>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium flex items-center">
+                <Ruler className="w-5 h-5 mr-2" />
+                Measurements
+              </h3>
+              {measurement?.measurement_number && (
+                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded border border-primary/20">
+                  {measurement.measurement_number}
+                </span>
+              )}
+            </div>
+            {measurement ? (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div>
+                  <label className="text-xs text-text-muted uppercase font-bold block mb-0.5">Shoulder</label>
+                  <p>{measurement.shoulder || '—'} <span className="text-[10px] text-text-muted">{measurement.unit || ''}</span></p>
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted uppercase font-bold block mb-0.5">Chest</label>
+                  <p>{measurement.chest || '—'} <span className="text-[10px] text-text-muted">{measurement.unit || ''}</span></p>
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted uppercase font-bold block mb-0.5">Waist</label>
+                  <p>{measurement.waist || '—'} <span className="text-[10px] text-text-muted">{measurement.unit || ''}</span></p>
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted uppercase font-bold block mb-0.5">Hip</label>
+                  <p>{measurement.hip || '—'} <span className="text-[10px] text-text-muted">{measurement.unit || ''}</span></p>
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted uppercase font-bold block mb-0.5">Sleeve</label>
+                  <p>{measurement.sleeve_length || '—'} <span className="text-[10px] text-text-muted">{measurement.unit || ''}</span></p>
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted uppercase font-bold block mb-0.5">Top</label>
+                  <p>{measurement.top_length || '—'} <span className="text-[10px] text-text-muted">{measurement.unit || ''}</span></p>
+                </div>
+              </div>
             ) : (
-              <div className="text-center">
-                <p className="text-sm text-text-muted mb-3">No measurements linked.</p>
-                {(role === 'admin' || role === 'manager') && (
-                  <Button variant="secondary" size="sm" onClick={() => navigate('/app/measurements/new')}>
-                    Link / Create
-                  </Button>
-                )}
+              <div className="text-center py-4">
+                <p className="text-sm text-text-muted">No measurements linked.</p>
               </div>
             )}
           </Card>

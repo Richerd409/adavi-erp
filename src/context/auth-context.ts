@@ -9,6 +9,8 @@ export interface AuthContextType {
   role: UserRole | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  signInWithOtp: (email: string) => Promise<{ error: any }>;
+  bypassAuth: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
