@@ -27,39 +27,41 @@ const ClientForm: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        const fetchClient = async (clientId: string) => {
+            try {
+                const { data, error } = await supabase
+                    .from('clients')
+                    .select('*')
+                    .eq('id', clientId)
+                    .single();
+
+                if (error) throw error;
+                if (data) {
+                    setFormData({
+                        name: data.name,
+                        phone: data.phone,
+                        email: data.email || '',
+                        address: data.address || '',
+                        notes: data.notes || ''
+                    });
+                }
+            } catch (err: unknown) {
+                console.error('Error fetching client:', err);
+                const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+
+                // Fallback for demo
+                if (errorMessage.includes('does not exist')) {
+                    setError("Setup Note: The 'clients' table needs to be created in Supabase.");
+                }
+            } finally {
+                setInitialLoading(false);
+            }
+        };
+
         if (isEditing && id) {
             fetchClient(id);
         }
-    }, [id]);
-
-    const fetchClient = async (clientId: string) => {
-        try {
-            const { data, error } = await supabase
-                .from('clients')
-                .select('*')
-                .eq('id', clientId)
-                .single();
-
-            if (error) throw error;
-            if (data) {
-                setFormData({
-                    name: data.name,
-                    phone: data.phone,
-                    email: data.email || '',
-                    address: data.address || '',
-                    notes: data.notes || ''
-                });
-            }
-        } catch (err: any) {
-            console.error('Error fetching client:', err);
-            // Fallback for demo
-            if (err.message?.includes('does not exist')) {
-                setError("Setup Note: The 'clients' table needs to be created in Supabase.");
-            }
-        } finally {
-            setInitialLoading(false);
-        }
-    };
+    }, [id, isEditing]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -86,9 +88,10 @@ const ClientForm: React.FC = () => {
             }
 
             navigate('/app/clients');
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error saving client:', err);
-            setError(err.message || 'Failed to save client');
+            const errorMessage = err instanceof Error ? err.message : 'Failed to save client';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -106,9 +109,10 @@ const ClientForm: React.FC = () => {
 
             if (error) throw error;
             navigate('/app/clients');
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error deleting client:', err);
-            setError(err.message);
+            const errorMessage = err instanceof Error ? err.message : 'Failed to delete client';
+            setError(errorMessage);
             setLoading(false);
         }
     };

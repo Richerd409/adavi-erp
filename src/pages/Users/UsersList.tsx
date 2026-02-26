@@ -3,10 +3,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/supabase';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '../../components/ui/Card';
-import { Loader2, Shield, UserPlus, X, Mail, Filter, Search, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { Loader2, Shield, UserPlus, X, Mail, Search, Edit2, Trash2 } from 'lucide-react';
 import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
 import { cn } from '../../lib/utils';
 

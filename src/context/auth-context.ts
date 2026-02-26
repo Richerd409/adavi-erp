@@ -9,6 +9,7 @@ export interface AuthContextType {
   role: UserRole | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signInWithOtp: (email: string) => Promise<{ error: any }>;
   bypassAuth: () => void;
 }

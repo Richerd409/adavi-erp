@@ -5,7 +5,7 @@ import type { Database } from '../../types/supabase';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
-import { Loader2, Plus, Search, Filter, MoreVertical, Calendar, Scissors, ChevronRight } from 'lucide-react';
+import { Plus, Search, Filter, MoreVertical, Calendar, Scissors, ChevronRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 type Order = Database['public']['Tables']['orders']['Row'];

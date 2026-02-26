@@ -79,7 +79,7 @@ const MeasurementForm: React.FC = () => {
     if (id) {
       fetchMeasurement();
     }
-  }, [id, role, navigate]);
+  }, [id, role, navigate, formData.measurement_number]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

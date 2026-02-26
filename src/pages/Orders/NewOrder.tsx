@@ -68,7 +68,7 @@ const NewOrder: React.FC = () => {
         measurement_number: `M-${Date.now().toString().slice(-6)}`
       }));
     }
-  }, [role, navigate]);
+  }, [role, navigate, measurementData.measurement_number]);
 
   const handleOrderChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

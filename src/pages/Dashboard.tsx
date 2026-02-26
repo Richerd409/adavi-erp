@@ -3,9 +3,8 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../types/supabase';
 import { Card, CardContent } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, TrendingUp, Clock, CheckCircle2, Package, ArrowRight, MoreHorizontal } from 'lucide-react';
+import { Clock, CheckCircle2, Package, ArrowRight, MoreHorizontal, TrendingUp } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 type Order = Database['public']['Tables']['orders']['Row'];

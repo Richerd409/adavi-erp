@@ -71,13 +71,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const bypassAuth = () => {
-    setUser({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fakeUser: any = {
       id: 'dev-admin',
       email: 'admin@adavi.dev',
       role: 'authenticated',
       aud: 'authenticated',
       created_at: new Date().toISOString(),
-    } as any);
+    };
+    setUser(fakeUser);
     setRole('admin');
     setLoading(false);
   };
