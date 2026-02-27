@@ -6,7 +6,12 @@ import { Card } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { Loader2, Banknote, Search, Filter, ArrowRight, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { Invoice } from './Invoice';
+import type { Database } from '../../types/supabase';
+
+type InvoiceRow = Database['public']['Tables']['invoices']['Row'];
+type Invoice = InvoiceRow & {
+    order?: { client_name: string } | null;
+};
 
 const FinanceList: React.FC = () => {
     const { user, role } = useAuth();
