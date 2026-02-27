@@ -62,8 +62,14 @@ const UsersList: React.FC = () => {
       e.preventDefault();
       try {
          setCreateLoading(true);
+
+         // Generate a dummy email if none is provided to satisfy Supabase auth requirements
+         const finalEmail = newUser.email.trim() !== ''
+            ? newUser.email
+            : `${newUser.name.toLowerCase().replace(/[^a-z0-9]/g, '')}${Math.floor(Math.random() * 1000)}@workshop.local`;
+
          const { error } = await supabase.functions.invoke('create-user', {
-            body: newUser
+            body: { ...newUser, email: finalEmail }
          });
 
          if (error) throw error;
@@ -123,7 +129,7 @@ const UsersList: React.FC = () => {
             </div>
             <Button onClick={() => setIsModalOpen(true)} className="shadow-[0_0_20px_rgba(99,102,241,0.3)] w-full md:w-auto">
                <UserPlus className="w-5 h-5 mr-2" />
-               Invite Member
+               Create User
             </Button>
          </div>
 
@@ -267,21 +273,21 @@ const UsersList: React.FC = () => {
                         </div>
 
                         <div>
-                           <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">Email Address</label>
+                           <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">Email Address (Optional)</label>
                            <input
                               type="email"
                               className="input-premium"
                               placeholder="name@company.com"
                               value={newUser.email}
                               onChange={e => setNewUser({ ...newUser, email: e.target.value })}
-                              required
                            />
+                           <p className="text-[10px] text-text-muted mt-1">If left blank, a system email will be generated automatically.</p>
                         </div>
 
                         <div>
-                           <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">Temporary Password</label>
+                           <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">Password</label>
                            <input
-                              type="password"
+                              type="text"
                               className="input-premium font-mono"
                               placeholder="••••••••"
                               value={newUser.password}
@@ -337,7 +343,7 @@ const UsersList: React.FC = () => {
                               {createLoading ? (
                                  <Loader2 className="w-5 h-5 animate-spin" />
                               ) : (
-                                 <>Send Invite <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" /></>
+                                 <>Create Account <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" /></>
                               )}
                            </Button>
                         </div>

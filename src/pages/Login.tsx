@@ -37,20 +37,32 @@ const Login: React.FC = () => {
     setError(null);
     setMessage(null);
 
+    console.log('Login attempt started', { useMagicLink, email });
+
     try {
       if (useMagicLink) {
+        console.log('Sending magic link...');
         const { error } = await signInWithOtp(email);
-        if (error) throw error;
+        if (error) {
+          console.error('Magic link error from Supabase:', error);
+          throw error;
+        }
+        console.log('Magic link sent successfully.');
         setMessage('Check your email for the magic link!');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        console.log('Signing in with password...');
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
+        if (error) {
+          console.error('Password login error from Supabase:', error);
+          throw error;
+        }
+        console.log('Password login successful:', data);
       }
     } catch (err: unknown) {
-      console.error('Login error:', err);
+      console.error('Login error block caught:', err);
       const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
       setError(errorMessage);
     } finally {

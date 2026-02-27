@@ -1,0 +1,51 @@
+# Task Backlog: Upcoming Features
+
+Here are the prioritized feature options we discussed, broken down into actionable steps for our next sessions:
+
+## Option 1: Advanced "Tailor" Workspace
+A streamlined, restricted view for Tailor roles to manage their specific workload without seeing financial details.
+- [ ] Planning 
+    - [ ] Design the Kanban-style board UI
+- [ ] Frontend Implementation
+    - [ ] Create `TailorDashboard.tsx`
+    - [ ] Implement query to fetch only orders assigned to the logged-in tailor
+    - [ ] Add drag-and-drop or simple buttons to change order `status` (To Do -> In Progress -> Ready for QC)
+    - [ ] Add view-only order details pane (hiding pricing)
+- [ ] Verification
+    - [ ] Test logging in as a Tailor and verifying they cannot see `/finance` or pricing data on orders
+
+## Option 2: Inventory & Fabric Management
+Track materials, deduct stock on usage, and get low-inventory warnings.
+- [ ] Database Schema
+    - [ ] Create `inventory` table (id, name, type, quantity in stock, unit, minimum threshold)
+    - [ ] Create `order_materials` lookup table to link orders to used inventory items
+- [ ] Frontend Implementation
+    - [ ] Create `InventoryList.tsx` for viewing and managing stock
+    - [ ] Update [NewOrder.tsx](file:///c:/Users/acer/adavi-erp-clone/src/pages/Orders/NewOrder.tsx) to let users optionally allocate fabric/materials to the order
+- [ ] Automation
+    - [ ] Add logic: when an order is created, automatically deduct the allocated material quantities from the `inventory` table
+- [ ] Verification
+    - [ ] Test creating an item and ensuring the stock decreases correctly when used
+
+## Option 3: Advanced Analytics Dashboard
+Interactive key performance indicators (KPIs) to gain business insights.
+- [ ] Component Integration
+    - [ ] Install a charting library (e.g., Recharts)
+- [ ] Frontend Implementation
+    - [ ] Update [Dashboard.tsx](file:///c:/Users/acer/adavi-erp-clone/src/pages/Dashboard.tsx) to fetch aggregate metrics
+    - [ ] Create Revenue Over Time chart (using `invoices` data)
+    - [ ] Create Popular Garment Types pie chart (using `orders` data)
+    - [ ] Create Tailor Workload bar chart (Orders per assigned tailor)
+- [ ] Verification
+    - [ ] Ensure charts load performantly and handle empty data elegantly
+
+## Option 4: Expense Tracking
+Track money going out (rent, fabric purchases, repairs) directly inside the ERP.
+- [ ] Database Schema
+    - [ ] Create `expenses` table (id, amount, date, category, description, created_by)
+- [ ] Frontend Implementation
+    - [ ] Update the [FinanceList.tsx](file:///c:/Users/acer/adavi-erp-clone/src/pages/Finance/FinanceList.tsx) page to include a new "Expenses" tab and visual switch
+    - [ ] Create an "Add Expense" modal or form
+    - [ ] Update dashboard logic to compute Revenue - Expenses = Net Profit
+- [ ] Verification
+    - [ ] Test logging an expense and ensure the Net Profit calculation updates immediately
